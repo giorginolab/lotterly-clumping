@@ -4,7 +4,6 @@ output:
   html_document:
     df_print: paged
   html_notebook: default
-  pdf_document: default
 ---
 
 In the 2020 extraction of the Italian lottery, there was a 
@@ -47,7 +46,7 @@ mdist <- function(N=6e6, n=200) {
 }
 ```
 
-Let's replicate for $R=1000$ times.
+Let's simulate $R$ lotteries, i.e. replicate for $R=1000$ times.
 
 ```{r}
 R <- 1000
@@ -59,7 +58,7 @@ The probabilities are now simply found by counting:
 ```{r}
 # Probabilities that, under the null hypothesis,
 # the minimum distance between two consecutive 
-# extractions was exactly 1...50
+# extractions was exactly 1, 2, ..., 20
 u <- table(md)[1:20]/R
 ```
 
@@ -75,12 +74,17 @@ plot(cu,
 abline(v=5, lty=3)
 ```
 
-So, a pair of serial numbers within, say, 5 of each other *or closer* is expected in approximately 3% of the extractions, or once every 30 lotteries. Note that since we are 
+So, a pair of serial numbers within, say, 5 of each other *or closer* is expected in approximately 3% of the lotteries, or once every 30.  Note that since we are 
 dealing with repeating tests (yearly extractions) it does not make
 sense to set a "traditional" $P$ threshold.
 
+As a footnote, check out how this problem is related 
+to the [birthday paradox](https://en.wikipedia.org/wiki/Birthday_problem)
+problem - with a similarly
+surprising outcome.
 
-## Clumps of 3
+
+## Solution: clumps of 3
 
 If one is looking for clumps of 3 serial numbers close together (say,
 within a radius of 5, as in the 2020 case), the solution is surprisingly
@@ -97,29 +101,28 @@ mdistC <- function(N=6e6, n=200, C=3) {
     min(diff(w, lag=C-1))
 }
 
-R <- 1000
+R <- 10000
 md3 <- replicate(R,mdistC(C=3))
 
-u3 <- table(md3)[1:20]/R
-cu3 <- cumsum(u3)
+md3s <- sort(md3)
+D <- (1:R)/R
 
-plot(cu3, 
-     xlab="Minimum distance between 3 consecutive winning serials",
-     ylab="Probability")
+plot(md3s, D, type="l",
+     xlab="Minimum span between 3 consecutive winning serials",
+     ylab="Cumulative Probability")
 
-abline(v=5, lty=3)
 
 ```
 
-## Conclusion
+Now, that's another story. 
+To gather sufficient statistics, we need to increase the number of replicas.
+Out of $R$ = `r R` replicates, the minimum "3-clumping radiuses"
+were...
 
-So, a clump of 3 winning tickets within a radius of 5 serial
-numbers is not that unlikely ($P \simeq 0.005$,
-or once every 200 lotteries). Somewhat low, but definitely
-not outside of the human life-span.
+```{r}
+md3s[1:10]
+```
 
-As a footnote, check out how this problem is related 
-to the [birthday paradox](https://en.wikipedia.org/wiki/Birthday_problem)
-problem - with a similarly
-surprising outcome.
+So not huge, but also quite far from the
+observed 5. Stay tuned for an analytical calculation.
 
