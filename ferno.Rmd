@@ -26,9 +26,11 @@ $N=6 \cdot 10^{6}$ [source needed].
 
 To simplify the model, let's assume that one extracts $n$ 
 winning serial numbers out of a set $1...N$, without replacement.
+
 Note that in reality serial numbers are not consecutive (e.g.,
-blocks may be unsold). The uniform-distribution we are assuming 
-is a worst-case scenario (least likely to lead to clumps).
+blocks may be unsold, causing "breaks" in the sequence).
+The uniform-distribution we are assuming 
+is a worst-case scenario (most likely to lead to clumps). 
 
 
 ## Warmup: pair of "nearby" consecutive serials
@@ -62,8 +64,8 @@ The probabilities are now simply found by counting:
 u <- table(md)[1:20]/R
 ```
 
-Since we are interested in the probability of finding numbers "closer than",
-say, a diameter of 5, we use the cumulative distribution plot for readability. 
+For readability, since we are interested in the probability of finding numbers 
+at a distance of, say, 5 *or closer*, we use the cumulative distribution plot.
 
 ```{r}
 # Cumulative probability
@@ -76,7 +78,7 @@ abline(v=5, lty=3)
 
 So, a pair of serial numbers within, say, 5 of each other *or closer* is expected in approximately 3% of the lotteries, or once every 30.  Note that since we are 
 dealing with repeating tests (yearly extractions) it does not make
-sense to set a "traditional" $P$ threshold.
+sense to set a traditional $P$ threshold.
 
 As a footnote, check out how this problem is related 
 to the [birthday paradox](https://en.wikipedia.org/wiki/Birthday_problem)
@@ -87,9 +89,10 @@ surprising outcome.
 ## Solution: clumps of 3
 
 If one is looking for clumps of 3 serial numbers close together (say,
-within a radius of 5, as in the 2020 case), the solution is surprisingly
+within a diameter of 5, as in the 2020 case), the calculation is surprisingly
 similar. We just need to compute the distance between the serial of 
- $i$-th extraction, and the serial of extraction $i+2$ (after sorting). A trivial 
+ $i$-th extracted winner, and the serial the $i+2$-th extracted 
+winner (after sorting). A trivial 
 modification to the code above yields:
 
 ```{r}
@@ -114,15 +117,24 @@ plot(md3s, D, type="l",
 
 ```
 
-Now, that's another story. 
-To gather sufficient statistics, we need to increase the number of replicas.
-Out of $R$ = `r R` replicates, the minimum "3-clumping radiuses"
+Now, that's another story. The occurrences of 3-clumps are much sparser and,
+to gather sufficient statistics, we need to increase the number of replicas.
+Out of $R$ = `r R` replicates, the minimum "3-clumping diameter"
 were...
 
 ```{r}
 md3s[1:10]
 ```
 
-So not huge, but also quite far from the
-observed 5. Stay tuned for an analytical calculation.
+So not huge, but still far from the
+observed 5. To properly sample the 
+final distribution at distances around 5, a separate notebook is provided 
+to perform the same calculation in 10^6 replicates
+(using the Python language for speed, but the code is otherwise
+identical). 
+
+The result is that the probability to see a minimum 3-clump diameter of
+5 or less is around 3 * 10^-6 per lottery.
+
+
 
