@@ -1,0 +1,125 @@
+---
+title: "On the clumping of lottery serial numbers"
+output:
+  html_document:
+    df_print: paged
+  html_notebook: default
+  pdf_document: default
+---
+
+In the 2020 extraction of the Italian lottery, there was a 
+"clump" of [3 almost-consecutive winning](https://milano.repubblica.it/cronaca/2020/01/07/news/lotteria_italia_ferno_varese_premi_biglietti_numeri_vicini-245177811/) serial numbers),
+namely P474343, P474346, P474348.  This has raised suspicions.
+
+
+**Q.** *How likely it is that such a clumping, or a stronger one, 
+would arise given the null hypothesis that winning numbers
+are independent and uniformly distributed, if extracted without
+replacement?*
+
+Let's use a simple Monte-carlo (how apt) simulation to 
+answer the question **Q**, which is of course framed as a 
+Fisher-style null-hypothesis test.
+
+The number of winners per year is $n=200$. The number of 
+Lottery tickets sold in 2020 was approximately 
+$N=6.5 \cdot 10^{6}$ [source needed]. 
+
+To simplify the model, let's assume that one extracts $n$ 
+winning serial numbers out of a set $1...N$, without replacement.
+Note that in reality serial numbers are not consecutive (e.g.,
+blocks may be unsold). The uniform-distribution we are assuming 
+is a worst-case scenario (least likely to lead to clumps).
+
+
+## Warmup: pair of "nearby" consecutive serials
+
+As an exercise, let's first compute the *distribution* of the
+minimum distance between two consecutive winning serial numbers.
+
+
+```{r}
+# Minimum distance between two lottery winning numbers, given
+# that one extracts n winners out of a pool of N
+mdist <- function(N=6e6, n=200) {
+    w <- sort(sample(N,n))
+    min(diff(w))
+}
+```
+
+Let's replicate for $R=1000$ times.
+
+```{r}
+R <- 1000
+md <- replicate(R,mdist())
+```
+
+The probabilities are now simply found by counting:
+
+```{r}
+# Probabilities that, under the null hypothesis,
+# the minimum distance between two consecutive 
+# extractions was exactly 1...50
+u <- table(md)[1:20]/R
+```
+
+Since we are interested in the probability of finding numbers "closer than",
+say, a diameter of 5, we use the cumulative distribution plot for readability. 
+
+```{r}
+# Cumulative probability
+cu <- cumsum(u)
+plot(cu, 
+     xlab="Minimum distance between consecutive winning serials",
+     ylab="Cumulative probability")
+abline(v=5, lty=3)
+```
+
+So, a pair of serial numbers within, say, 5 of each other *or closer* is expected in approximately 3% of the extractions, or once every 30 lotteries. Note that since we are 
+dealing with repeating tests (yearly extractions) it does not make
+sense to set a "traditional" $P$ threshold.
+
+
+## Clumps of 3
+
+If one is looking for clumps of 3 serial numbers close together (say,
+within a radius of 5, as in the 2020 case), the solution is surprisingly
+similar. We just need to compute the distance between the serial of 
+ $i$-th extraction, and the serial of extraction $i+2$ (after sorting). A trivial 
+modification to the code above yields:
+
+```{r}
+
+# Minimum distance between C CONSECUTIVE lottery winning numbers, given that
+# one extracts n winners out of a pool of N
+mdistC <- function(N=6e6, n=200, C=3) {
+    w <- sort(sample(N,n))
+    min(diff(w, lag=C-1))
+}
+
+R <- 1000
+md3 <- replicate(R,mdistC(C=3))
+
+u3 <- table(md3)[1:20]/R
+cu3 <- cumsum(u3)
+
+plot(cu3, 
+     xlab="Minimum distance between 3 consecutive winning serials",
+     ylab="Probability")
+
+abline(v=5, lty=3)
+
+```
+
+## Conclusion
+
+So, a clump of 3 winning tickets within a radius of 5 serial
+numbers is not that unlikely ($P \simeq 0.005$,
+or once every 200 lotteries). Somewhat low, but definitely
+not outside of the human life-span.
+
+As a footnote, check out how this problem is related 
+to the [birthday paradox](https://en.wikipedia.org/wiki/Birthday_problem)
+problem - with a similarly
+surprising outcome.
+
