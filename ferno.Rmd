@@ -65,16 +65,23 @@ u <- table(md)[1:20]/R
 ```
 
 For readability, since we are interested in the probability of finding numbers 
-at a distance of, say, 5 *or closer*, we use the cumulative distribution plot.
+at a distance of, say, 5 *or closer*, we use the cumulative distribution plot (circles).
 
 ```{r}
-# Cumulative probability
-cu <- cumsum(u)
+B <- function(k,n,p) {
+    logB <- lfactorial(p-1) - (p-1)*log(n) + lchoose(n-p*(k-1)-1,
+                                                     p-1)
+    exp(logB)
+}
+
+k <- 1:20
 plot(cu, 
      xlab="Minimum distance between consecutive winning serials",
      ylab="Cumulative probability")
 abline(v=5, lty=3)
+points(k, 1-B(k, N, n), col=2, pth=2)
 ```
+
 
 So, a pair of serial numbers within, say, 5 of each other *or closer* is expected in approximately 3% of the lotteries, or once every 30.  Note that since we are 
 dealing with repeating tests (yearly extractions) it does not make
@@ -82,8 +89,11 @@ sense to set a traditional $P$ threshold.
 
 As a footnote, check out how this problem is related 
 to the [birthday paradox](https://en.wikipedia.org/wiki/Birthday_problem)
-problem - with a similarly
-surprising outcome.
+problem - with a similarly surprising outcome.
+
+Abramson and Moser tackled a very similar problem in Abramson M, Moser WOJ. More Birthday Surprises. [The American Mathematical Monthly. 1970 Oct 1;77(8):856–8](https://www.tandfonline.com/doi/abs/10.1080/00029890.1970.11992600), where they
+provide an analytical expression for a very similar problem (in red). 
+
 
 
 ## Solution: clumps of 3
