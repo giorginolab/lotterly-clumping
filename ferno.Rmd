@@ -23,7 +23,7 @@ Fisher-style null-hypothesis test.
 
 The number of winners per year is $n=200$. The number of 
 Lottery tickets sold in 2020 was approximately 
-$N=6.5 \cdot 10^{6}$ [source needed]. 
+$N=6 \cdot 10^{6}$ [source needed]. 
 
 To simplify the model, let's assume that one extracts $n$ 
 winning serial numbers out of a set $1...N$, without replacement.
